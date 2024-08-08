@@ -15,7 +15,7 @@ router.post('/login', async function (req, res, next) {
     let { email, password } = req.body;
 
     if (email && password) {
-
+      
       const newUser = new User({ email, password });
 
       return res.status(201).json({
