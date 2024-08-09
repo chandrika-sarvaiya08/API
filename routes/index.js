@@ -3,37 +3,58 @@ let router = express.Router();
 let bcrypt = require('bcrypt');
 let User = require('../model/user');
 
-router.get('/login', async function (req, res, next) {
-  res.render("index", { title: "First Api Create" });
-});
+router.get('/', function (req, res) {
+  res.render('index', { title: "FIRST API CREATE" })
+})
 
-router.post('/login', async function (req, res, next) {
-  
+router.post('/signup', async function (req, res, next) {
   try {
 
-    let { email, password } = req.body;
+    req.body.password = await bcrypt.hash(req.body.password, 10)
 
-    if (email && password) {
-      const hashedPassword = await bcrypt.hash(password, 10); // Hash the password
+    const userCreate = await User.create(req.body);
+    console.log(userCreate);
 
-      const newUser = new User({ email, password: hashedPassword });
+    res.status(201).json({
+      status: "success",
+      message: "User create successfully!",
+      data: userCreate
 
-      return res.status(201).json({
-        status: "success",
-        message: "User created successfully!",
-        data: newUser
-      });
-    } 
+    })
+  } catch (error) {
 
-  } catch (err) {
-
-    return res.status(400).json({
-
+    res.status(404).json({
       status: "fail",
-      message: err.message
+      message: error.message
 
     });
 
+  }
+
+});
+
+router.post('/login', async function (req, res, next) {
+
+  try {
+
+    const userFind = await User.findOne({ email: req.body.email });            //email find for login
+    if (!userFind) throw new Error("User not found!")
+
+    let passwordCompare = await bcrypt.compare(req.body.password, userFind.password)
+    if (!passwordCompare) throw new Error("password invalid")
+
+    res.status(200).json({                             //OK
+      status: "success",
+      message: "User login successfully!",
+      data: userFind
+
+    })
+  } catch (error) {
+
+    res.status(404).json({
+      status: "fail",
+      message: error.message
+    });
   }
 
 });
