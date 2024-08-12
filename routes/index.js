@@ -115,83 +115,30 @@ router.get('/:id', async function (req, res, next) {
 
 
 //UPDATE DATA
-// router.patch('/:id', async function (req, res, next) {
-
-//   try {
-
-//     req.body.password = await bcrypt.hash(req.body.password, 10)
-//     const userUpdate = await User.findByIdAndUpdate(req.params.id, req.body,{new : true});           
-
-//     res.status(200).json({                             //OK
-//       status: "success",
-//       message: "User Update Successfully!",
-//       data: userUpdate
-
-//     })
-
-//   } catch (error) {
-
-//     res.status(404).json({
-//       status: "fail",
-//       message: error.message
-
-//     });
-//   }
-
-// });
-
-
 router.patch('/:id', async function (req, res, next) {
-    try {
-        const { oldPassword, newPassword } = req.body;
 
-        // Find the user by ID
-        const user = await User.findById(req.params.id);
+  try {
 
-        if (!user) {
-            return res.status(404).json({
-                status: "fail",
-                message: "User not found"
-            });
-        }
+    req.body.password = await bcrypt.hash(req.body.password, 10)
+    const userUpdate = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
 
-        // Verify the old password
-        const isMatch = await bcrypt.compare(oldPassword, user.password);
-        if (!isMatch) {
-            return res.status(400).json({
-                status: "fail",
-                message: "Incorrect old password"
-            });
-        }
+    res.status(200).json({                             //OK
+      status: "success",
+      message: "User Update Successfully!",
+      data: userUpdate
 
-        // Validate the new password (example: must be at least 8 characters)
-        if (newPassword.length < 8) {
-            return res.status(400).json({
-                status: "fail",
-                message: "New password must be at least 8 characters long"
-            });
-        }
+    })
 
-        // Hash the new password
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
+  } catch (error) {
 
-        // Update the user's password
-        user.password = hashedPassword;
-        await user.save();
+    res.status(404).json({
+      status: "fail",
+      message: error.message
 
-        res.status(200).json({
-            status: "success",
-            message: "Password changed successfully!"
-        });
+    });
+  }
 
-    } catch (error) {
-        res.status(500).json({
-            status: "fail",
-            message: error.message
-        });
-    }
 });
-
 
 
 //DELETE DATA
