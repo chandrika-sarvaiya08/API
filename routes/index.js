@@ -21,6 +21,7 @@ router.post('/signup', async function (req, res, next) {
       data: userCreate
 
     })
+
   } catch (error) {
 
     res.status(404).json({
@@ -28,7 +29,6 @@ router.post('/signup', async function (req, res, next) {
       message: error.message
 
     });
-
   }
 
 });
@@ -59,4 +59,98 @@ router.post('/login', async function (req, res, next) {
 
 });
 
+router.get('/data', async function (req, res, next) {
+
+  try {
+
+    const userFind = await User.find();           
+
+    res.status(200).json({                             //OK
+      status: "success",
+      message: "User found successfully!",
+      data: userFind
+
+    })
+
+  } catch (error) {
+
+    res.status(404).json({
+      status: "fail",
+      message: error.message
+    });
+  }
+
+});
+
+router.get('/:id', async function (req, res, next) {
+
+  try {
+
+    const userFind = await User.findById(req.params.id);           
+
+    res.status(200).json({                             //OK
+      status: "success",
+      message: "User find successfully!",
+      data: userFind
+
+    })
+
+  } catch (error) {
+
+    res.status(404).json({
+      status: "fail",
+      message: error.message
+    });
+  }
+
+});
+
+router.patch('/:id', async function (req, res, next) {
+
+  try {
+
+    req.body.password = await bcrypt.hash(req.body.password, 10)
+    const userUpdate = await User.findByIdAndUpdate(req.params.id, req.body,{new : true});           
+
+    res.status(200).json({                             //OK
+      status: "success",
+      message: "User Update Successfully!",
+      data: userUpdate
+
+    })
+
+  } catch (error) {
+
+    res.status(404).json({
+      status: "fail",
+      message: error.message
+    });
+  }
+
+});
+
+router.delete('/:id', async function (req, res, next) {
+
+  try {
+
+    const userDelete = await User.findByIdAndDelete(req.params.id);           
+
+    res.status(200).json({                             //OK
+      status: "success",
+      message: "User Delete Successfully!",
+
+    })
+
+  } catch (error) {
+
+    res.status(404).json({
+      status: "fail",
+      message: error.message
+      
+    });
+  }
+
+});
+
 module.exports = router;
+
