@@ -7,6 +7,8 @@ router.get('/', function (req, res) {
   res.render('index', { title: "FIRST API CREATE" })
 })
 
+
+//SIGN UP
 router.post('/signup', async function (req, res, next) {
   try {
 
@@ -33,6 +35,8 @@ router.post('/signup', async function (req, res, next) {
 
 });
 
+
+//LOGIN
 router.post('/login', async function (req, res, next) {
 
   try {
@@ -59,11 +63,13 @@ router.post('/login', async function (req, res, next) {
 
 });
 
+
+//FOUND DATA
 router.get('/data', async function (req, res, next) {
 
   try {
 
-    const userFind = await User.find();           
+    const userFind = await User.find();
 
     res.status(200).json({                             //OK
       status: "success",
@@ -82,11 +88,13 @@ router.get('/data', async function (req, res, next) {
 
 });
 
+
+//FIND DATA BY ID
 router.get('/:id', async function (req, res, next) {
 
   try {
 
-    const userFind = await User.findById(req.params.id);           
+    const userFind = await User.findById(req.params.id);
 
     res.status(200).json({                             //OK
       status: "success",
@@ -105,35 +113,93 @@ router.get('/:id', async function (req, res, next) {
 
 });
 
+
+//UPDATE DATA
+// router.patch('/:id', async function (req, res, next) {
+
+//   try {
+
+//     req.body.password = await bcrypt.hash(req.body.password, 10)
+//     const userUpdate = await User.findByIdAndUpdate(req.params.id, req.body,{new : true});           
+
+//     res.status(200).json({                             //OK
+//       status: "success",
+//       message: "User Update Successfully!",
+//       data: userUpdate
+
+//     })
+
+//   } catch (error) {
+
+//     res.status(404).json({
+//       status: "fail",
+//       message: error.message
+
+//     });
+//   }
+
+// });
+
+
 router.patch('/:id', async function (req, res, next) {
+    try {
+        const { oldPassword, newPassword } = req.body;
 
-  try {
+        // Find the user by ID
+        const user = await User.findById(req.params.id);
 
-    req.body.password = await bcrypt.hash(req.body.password, 10)
-    const userUpdate = await User.findByIdAndUpdate(req.params.id, req.body,{new : true});           
+        if (!user) {
+            return res.status(404).json({
+                status: "fail",
+                message: "User not found"
+            });
+        }
 
-    res.status(200).json({                             //OK
-      status: "success",
-      message: "User Update Successfully!",
-      data: userUpdate
+        // Verify the old password
+        const isMatch = await bcrypt.compare(oldPassword, user.password);
+        if (!isMatch) {
+            return res.status(400).json({
+                status: "fail",
+                message: "Incorrect old password"
+            });
+        }
 
-    })
+        // Validate the new password (example: must be at least 8 characters)
+        if (newPassword.length < 8) {
+            return res.status(400).json({
+                status: "fail",
+                message: "New password must be at least 8 characters long"
+            });
+        }
 
-  } catch (error) {
+        // Hash the new password
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    res.status(404).json({
-      status: "fail",
-      message: error.message
-    });
-  }
+        // Update the user's password
+        user.password = hashedPassword;
+        await user.save();
 
+        res.status(200).json({
+            status: "success",
+            message: "Password changed successfully!"
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            status: "fail",
+            message: error.message
+        });
+    }
 });
 
+
+
+//DELETE DATA
 router.delete('/:id', async function (req, res, next) {
 
   try {
 
-    const userDelete = await User.findByIdAndDelete(req.params.id);           
+    await User.findByIdAndDelete(req.params.id);
 
     res.status(200).json({                             //OK
       status: "success",
@@ -146,11 +212,11 @@ router.delete('/:id', async function (req, res, next) {
     res.status(404).json({
       status: "fail",
       message: error.message
-      
+
     });
   }
 
 });
 
-module.exports = router;
 
+module.exports = router;
